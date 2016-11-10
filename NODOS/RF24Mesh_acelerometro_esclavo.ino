@@ -1,20 +1,8 @@
-
-
 ///variables accel
-//Analog read pins
-const int xPin = 0;
-
-
-//The minimum and maximum values that came from
-//the accelerometer while standing still
-//You very well may need to change these
-//int minVal = 265;
-//int maxVal = 402;
-
-
-//to hold the caculated values
-double x;
-
+const int xPin = 4;
+const int yPin = 5;
+///Analog read pin flexo
+const int flexoPin = 7;
 
 /** RF24Mesh_Example.ino by TMRh20
  *
@@ -46,24 +34,27 @@ RF24Mesh mesh(radio, network);
  * This will be stored in EEPROM on AVR devices, so remains persistent between further uploads, loss of power, etc.
  *
  **/
-#define nodeID 2
+
+//cada nodo debe llevar un id único
+#define nodeID 4
 
 
 uint32_t displayTimer = 0;
 int acc_x;
+int acc_y;
 struct payload_t {
   unsigned long ms;
   unsigned long counter;
 };
 
 void setup() {
-
+//definir baud del puerto serial (arduino nano max 38400)
   Serial.begin(38400);
-  //printf_begin();
+  
   // Set the nodeID manually
-  mesh.setNodeID(nodeID);
+ mesh.setNodeID(nodeID);
   // Connect to the mesh
-  mesh.begin();
+ mesh.begin();
 }
 
 
@@ -74,34 +65,47 @@ void loop() {
 
   //read the analog values from the accelerometer
   int xRead = analogRead(xPin);
- 
-  Serial.println(xRead);
-  //convert read values to degrees -90 to 90 - Needed for atan2
-  //int xAng = map(xRead, minVal, maxVal, -90, 90);
-
-  
-
+  int yRead = analogRead(yPin);
+  int flexoRead = analogRead(flexoPin);
 
   // Send to the master node every second
-  if (millis() - displayTimer >= 30) {
+if (millis() - displayTimer >= 10) {
     displayTimer = millis();
     acc_x=xRead;
-    // Send an 'E' type message containing the current millis()
-    if (!mesh.write(&acc_x, 'B', sizeof(acc_x))) {
+    acc_y=yRead;
+     // Envia un mensaje con un 'CARACTER' como header y el valor X del acelerometro
+    if (!mesh.write(&acc_x, 'H', sizeof(acc_x))) {
 
       // If a write fails, check connectivity to the mesh network
       if ( ! mesh.checkConnection() ) {
         //refresh the network address
         Serial.println("Renewing Address");
         mesh.renewAddress();
-      } else {
-        Serial.println("Send fail, Test OK");
       }
-    } else {
-      Serial.print("Send OK: "); Serial.println(acc_x);
+    }
+     // Envia un mensaje con un 'CARACTER' como header y el valor Y del acelerometro
+     if (!mesh.write(&acc_y, 'I', sizeof(acc_y))) {
+
+      // If a write fails, check connectivity to the mesh network
+      if ( ! mesh.checkConnection() ) {
+        //refresh the network address
+        Serial.println("Renewing Address");
+        mesh.renewAddress();
+      }
+    } 
+
+ // Envia un mensaje con un 'CARACTER' como header y el valor del flexo
+    if (!mesh.write(&flexoRead, 'J', sizeof(flexoRead))) {
+
+      // If a write fails, check connectivity to the mesh network
+      if ( ! mesh.checkConnection() ) {
+        //refresh the network address
+        Serial.println("Renewing Address");
+        mesh.renewAddress();
+      }
     }
   }
-
+/*
   while (network.available()) {
     RF24NetworkHeader header;
     payload_t payload;
@@ -110,8 +114,11 @@ void loop() {
     Serial.print(payload.counter);
     Serial.print(" at ");
     Serial.println(payload.ms);
-  }
+  }*/
 }
+
+
+
 
 
 

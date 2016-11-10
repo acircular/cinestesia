@@ -20,19 +20,6 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 
-
-// uncomment "OUTPUT_READABLE_ACCELGYRO" if you want to see a tab-separated
-// list of the accel X/Y/Z and then gyro X/Y/Z values in decimal. Easy to read,
-// not so easy to parse, and slow(er) over UART.
-#define OUTPUT_READABLE_ACCELGYRO
-
-// uncomment "OUTPUT_BINARY_ACCELGYRO" to send all 6 axes of data as 16-bit
-// binary, one right after the other. This is very fast (as fast as possible
-// without compression or data loss), and easy to parse, but impossible to read
-// for a human.
-//#define OUTPUT_BINARY_ACCELGYRO
-
-
 #define LED_PIN 13
 bool blinkState = false;
 
@@ -71,6 +58,10 @@ RF24Mesh mesh(radio, network);
 #define nodeID 5
 
 int32_t giro_x;
+int32_t giro_y;
+int32_t acc_x;
+int32_t acc_y;
+
 uint32_t displayTimer = 0;
 
 struct payload_t {
@@ -112,42 +103,65 @@ void loop() {
  // read raw accel/gyro measurements from device
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-    // these methods (and a few others) are also available
-    //accelgyro.getAcceleration(&ax, &ay, &az);
-    //accelgyro.getRotation(&gx, &gy, &gz);
-
-    #ifdef OUTPUT_READABLE_ACCELGYRO
-        // display tab-separated accel/gyro x/y/z values
-       /* Serial.print("a/g:\t");
-        Serial.print(ax); Serial.print("\t");
-        Serial.print(ay); Serial.print("\t");
-        Serial.print(az); Serial.print("\t");
-        Serial.print(gx); Serial.print("\t");
-        Serial.print(gy); Serial.print("\t");
-        Serial.println(gz);*/
-    #endif
   // Send to the master node every second
-  if (millis() - displayTimer >= 30) {
+  if (millis() - displayTimer >= 10) {
     displayTimer = millis();
     
-    giro_x=gy;
+    giro_x=gx;
     // Send an 'D' type message containing the current millis()
-    if (!mesh.write(&giro_x, 'F', sizeof(giro_x))) {
+    if (!mesh.write(&giro_x, 'K', sizeof(giro_x))) {
 
       // If a write fails, check connectivity to the mesh network
       if ( ! mesh.checkConnection() ) {
         //refresh the network address
         Serial.println("Renewing Address");
         mesh.renewAddress();
-      } else {
-        Serial.println("Send fail, Test OK");
       }
-    } else {
-      Serial.print("Send OK: "); Serial.println(giro_x);
-    }
+  }
+      if (millis() - displayTimer >= 10) {
+    displayTimer = millis();
+    
+    giro_y=gy;
+    // Send an 'D' type message containing the current millis()
+    if (!mesh.write(&giro_y, 'L', sizeof(giro_y))) {
+
+      // If a write fails, check connectivity to the mesh network
+      if ( ! mesh.checkConnection() ) {
+        //refresh the network address
+        Serial.println("Renewing Address");
+        mesh.renewAddress();
+      }
+  }
+if (millis() - displayTimer >= 10) {
+    displayTimer = millis();
+    
+    acc_x=ax;
+    // Send an 'D' type message containing the current millis()
+    if (!mesh.write(&acc_x, 'M', sizeof(acc_x))) {
+
+      // If a write fails, check connectivity to the mesh network
+      if ( ! mesh.checkConnection() ) {
+        //refresh the network address
+        Serial.println("Renewing Address");
+        mesh.renewAddress();
+      }
+  }
+      if (millis() - displayTimer >= 10) {
+    displayTimer = millis();
+    
+    acc_y=ay;
+    // Send an 'D' type message containing the current millis()
+    if (!mesh.write(&acc_y, 'N', sizeof(acc_y))) {
+
+      // If a write fails, check connectivity to the mesh network
+      if ( ! mesh.checkConnection() ) {
+        //refresh the network address
+        Serial.println("Renewing Address");
+        mesh.renewAddress();
+      }
   }
 
-  while (network.available()) {
+  /*while (network.available()) {
     RF24NetworkHeader header;
     payload_t payload;
     network.read(header, &payload, sizeof(payload));
@@ -155,7 +169,7 @@ void loop() {
     Serial.print(payload.counter);
     Serial.print(" at ");
     Serial.println(payload.ms);
-  }
+  }*/
 }
 
 

@@ -21,14 +21,14 @@
 #include <EEPROM.h>
 
 /***** Configure the chosen CE,CS pins *****/
-RF24 radio(2,3);///pines del CE y CSN creo...
+RF24 radio(7,8);///pines del CE y CSN creo...
 RF24Network network(radio);
 RF24Mesh mesh(radio,network);
 
 uint32_t displayTimer = 0;
 
 void setup() {
-  Serial.begin(38400);
+  Serial.begin(115200);
 
   // Set the nodeID to 0 for the master node
   mesh.setNodeID(0);
@@ -57,15 +57,25 @@ void loop() {
     int32_t dat=0;
     switch(header.type){
       // Display the incoming millis() values from the sensor nodes
-      case 'B': network.read(header,&dat,sizeof(dat)); Serial.print("nodo_B_X: "); Serial.print(dat); Serial.println("\t");break;
-      case 'C': network.read(header,&dat,sizeof(dat)); Serial.print("nodo_C_X: "); Serial.print(dat); Serial.println("\t");break;
-      case 'D': network.read(header,&dat,sizeof(dat)); Serial.print("nodo_D_X: "); Serial.print(dat); Serial.println("\t"); break;
-      case 'E': network.read(header,&dat,sizeof(dat)); Serial.print("nodo_E_X: "); Serial.print(dat); Serial.println("\t"); break;
-      case 'F': network.read(header,&dat,sizeof(dat)); Serial.print("nodo_F_X: "); Serial.println(dat); break;
+      case 'B': network.read(header,&dat,sizeof(dat)); Serial.print("b"); Serial.print(dat); Serial.println("\t");break;
+      case 'C': network.read(header,&dat,sizeof(dat)); Serial.print("c"); Serial.print(dat); Serial.println("\t");break;
+      case 'D': network.read(header,&dat,sizeof(dat)); Serial.print("d"); Serial.print(dat); Serial.println("\t"); break;
+      case 'E': network.read(header,&dat,sizeof(dat)); Serial.print("e"); Serial.print(dat); Serial.println("\t"); break;
+      case 'F': network.read(header,&dat,sizeof(dat)); Serial.print("f"); Serial.print(dat); Serial.println("\t"); break;
+      case 'G': network.read(header,&dat,sizeof(dat)); Serial.print("g"); Serial.print(dat); Serial.println("\t"); break;  
+      case 'H': network.read(header,&dat,sizeof(dat)); Serial.print("h"); Serial.print(dat); Serial.println("\t"); break;
+      case 'I': network.read(header,&dat,sizeof(dat)); Serial.print("i"); Serial.print(dat); Serial.println("\t"); break;
+      case 'j': network.read(header,&dat,sizeof(dat)); Serial.print("j"); Serial.println(dat); break;
       default: network.read(header,0,0); Serial.println(header.type);break;
     }
   }
   
+  if(!Serial) {  //check if Serial is available... if not,
+       Serial.end();      // close serial port
+       delay(100);        //wait 100 millis
+       Serial.begin(115200); // reenable serial again
+   }
+ 
   if(millis() - displayTimer > 5000){
     displayTimer = millis();
     Serial.println(" ");

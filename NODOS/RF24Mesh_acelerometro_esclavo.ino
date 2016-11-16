@@ -36,12 +36,13 @@ RF24Mesh mesh(radio, network);
  **/
 
 //cada nodo debe llevar un id único
-#define nodeID 4
+#define nodeID 1
 
 
 uint32_t displayTimer = 0;
-int acc_x;
-int acc_y;
+//int acc_x;
+//int acc_y;
+int data[2];
 struct payload_t {
   unsigned long ms;
   unsigned long counter;
@@ -71,10 +72,10 @@ void loop() {
   // Send to the master node every second
 if (millis() - displayTimer >= 10) {
     displayTimer = millis();
-    acc_x=xRead;
-    acc_y=yRead;
+    data[0]=xRead;
+    data[1]=yRead;
      // Envia un mensaje con un 'CARACTER' como header y el valor X del acelerometro
-    if (!mesh.write(&acc_x, 'H', sizeof(acc_x))) {
+    if (!mesh.write(&data, '1', sizeof(data))) {
 
       // If a write fails, check connectivity to the mesh network
       if ( ! mesh.checkConnection() ) {
@@ -82,39 +83,8 @@ if (millis() - displayTimer >= 10) {
         Serial.println("Renewing Address");
         mesh.renewAddress();
       }
-    }
-     // Envia un mensaje con un 'CARACTER' como header y el valor Y del acelerometro
-     if (!mesh.write(&acc_y, 'I', sizeof(acc_y))) {
-
-      // If a write fails, check connectivity to the mesh network
-      if ( ! mesh.checkConnection() ) {
-        //refresh the network address
-        Serial.println("Renewing Address");
-        mesh.renewAddress();
-      }
-    } 
-
- // Envia un mensaje con un 'CARACTER' como header y el valor del flexo
-    if (!mesh.write(&flexoRead, 'J', sizeof(flexoRead))) {
-
-      // If a write fails, check connectivity to the mesh network
-      if ( ! mesh.checkConnection() ) {
-        //refresh the network address
-        Serial.println("Renewing Address");
-        mesh.renewAddress();
-      }
-    }
+    }   
   }
-/*
-  while (network.available()) {
-    RF24NetworkHeader header;
-    payload_t payload;
-    network.read(header, &payload, sizeof(payload));
-    Serial.print("Received packet #");
-    Serial.print(payload.counter);
-    Serial.print(" at ");
-    Serial.println(payload.ms);
-  }*/
 }
 
 

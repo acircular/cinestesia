@@ -36,13 +36,13 @@ RF24Mesh mesh(radio, network);
  **/
 
 //cada nodo debe llevar un id único
-#define nodeID 1
+#define nodeID 3
 
 
 uint32_t displayTimer = 0;
 //int acc_x;
 //int acc_y;
-int data[2];
+int data[3];
 struct payload_t {
   unsigned long ms;
   unsigned long counter;
@@ -70,23 +70,23 @@ void loop() {
   int flexoRead = analogRead(flexoPin);
 
   // Send to the master node every second
-if (millis() - displayTimer >= 10) {
+if (millis() - displayTimer >= 100) {
     displayTimer = millis();
     data[0]=xRead;
     data[1]=yRead;
+    data[2]=flexoRead;
      // Envia un mensaje con un 'CARACTER' como header y el valor X del acelerometro
-    if (!mesh.write(&data, '1', sizeof(data))) {
+    if (!mesh.write(&data, '3', sizeof(data))) {
 
       // If a write fails, check connectivity to the mesh network
       if ( ! mesh.checkConnection() ) {
         //refresh the network address
-        Serial.println("Renewing Address");
+        // Serial.println("Renewing Address");
         mesh.renewAddress();
       }
     }   
   }
 }
-
 
 
 
